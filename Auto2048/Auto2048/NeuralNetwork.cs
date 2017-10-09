@@ -50,6 +50,19 @@ namespace AutomaticSnake
             return Layers.Last().Nodes.Select(x => x.Value).ToArray();
         }
 
+        public static class ActivationFunctions
+        {
+            public static double Sigmoid(double x)
+            {
+                return (1 / (1 + Math.Exp(-1 * x)));
+            }
+
+            public static double TanH(double x)
+            {
+                return (2 / (1 + Math.Exp(-2 * x))) - 1;
+            }
+        }
+
         public void Mutate(double rate)
         {
             foreach (Layer l in Layers)
@@ -57,12 +70,12 @@ namespace AutomaticSnake
                 foreach (Node n in l.Nodes)
                 {
                     if (Util.RandomSeededDouble() <= rate)
-                        n.Bias = Util.RandomSeededInt(-1, 1) + Util.RandomSeededDouble();
+                        n.Bias = Util.RandomSeededDouble() * 2 - 1;
 
                     foreach (Edge e in n.Edges)
                     {
                         if (Util.RandomSeededDouble() <= rate)
-                            e.Weight = Util.RandomSeededInt(-1, 1) + Util.RandomSeededDouble();
+                            e.Weight = Util.RandomSeededDouble() * 2 - 1;
                     }
                 }
             }
@@ -86,5 +99,6 @@ namespace AutomaticSnake
             }
             return child;
         }
+
     }
 }

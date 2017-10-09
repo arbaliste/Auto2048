@@ -19,11 +19,10 @@ namespace AutomaticSnake
             int maxTrials = 20;
             Trial[] trials = Enumerable.Range(0, maxTrials).Select(x => new Trial()
             {
-                Network = new NeuralNetwork(new int[] { size, 9, 1 }, Util.Sigmoid),
+                Network = new NeuralNetwork(new int[] { size, 9, 1 }, NeuralNetwork.ActivationFunctions.Sigmoid),
                 Fitness = 0,
                 Driver = new ChromeDriver()
             }).ToArray();
-            Trial bestTrial = trials[0];
 
             foreach (Trial t in trials)
                 t.Driver.Navigate().GoToUrl("http://arbaliste.github.io/Auto2048");
@@ -65,13 +64,8 @@ namespace AutomaticSnake
                 });
                 for (int i = 0; i < trials.Length; i++)
                     Console.WriteLine(" - Trial " + i + ": " + trials[i].Fitness);
-                bestTrial = trials.OrderBy(x => x.Fitness).Last();
-                for (int i = 0; i < trials.Length; i++)
-                {
-                    trials[i].Network = NeuralNetwork.Cross(bestTrial.Network, trials[i].Network);
-                    if (trials[i] != bestTrial) trials[i].Network.Mutate(0.25);
-                }
-                Console.WriteLine(" - Best: " + bestTrial.Fitness);
+                Trial.BreedMethods.Aggressive(trials, 0.3);
+                Console.WriteLine(" - Best: " + trials.OrderBy(x => x.Fitness).Last().Fitness);
                 gen++;
             }
         }
