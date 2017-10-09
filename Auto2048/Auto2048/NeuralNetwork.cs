@@ -9,9 +9,11 @@ namespace AutomaticSnake
     class NeuralNetwork
     {
         public List<Layer> Layers;
+        public Func<double, double> Activation;
 
-        public NeuralNetwork(int[] layerNums)
+        public NeuralNetwork(int[] layerNums, Func<double, double> function)
         {
+            Activation = function;
             Layers = new List<Layer>();
             for (int i = 0; i < layerNums.Length; i++)
             {
@@ -27,11 +29,6 @@ namespace AutomaticSnake
                 }
                 Layers.Add(l);
             }
-        }
-
-        private double Activation(double x)
-        {
-            return (2 / (1 + Math.Exp(-2 * x))) - 1;
         }
 
         public double[] Run(double[] input)
@@ -73,12 +70,18 @@ namespace AutomaticSnake
 
         public static NeuralNetwork Cross(NeuralNetwork a, NeuralNetwork b)
         {
-            NeuralNetwork child = new NeuralNetwork(a.Layers.Select(x => x.Nodes.Count).ToArray());
+            if (a.Activation != b.Activation) throw new ArgumentException("Networks have different activation functions");
+            NeuralNetwork child = new NeuralNetwork(a.Layers.Select(x => x.Nodes.Count).ToArray(), a.Activation);
             for (int i = 0; i < a.Layers.Count; i++)
             {
                 for (int j = 0; j < a.Layers[i].Nodes.Count; j++)
                 {
-                    child.Layers[i].Nodes[j].Bias = Util.RandomSeededDouble() < 0.5 ? a.Layers[i].Nodes[j].Bias : b.Layers[i].Nodes[j].Bias;
+                    Node copy = (Util.RandomSeededDouble() < 0.5 ? a : b).Layers[i].Nodes[j];
+                    for (int e = 0; e < child.Layers[i].Nodes[j].Edges.Count; e++)
+                    {
+                        child.Layers[i].Nodes[j].Edges[e].Weight = copy.Edges[e].Weight;
+                    }
+                    child.Layers[i].Nodes[j].Bias = copy.Bias;
                 }
             }
             return child;

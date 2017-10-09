@@ -17,5 +17,15 @@ namespace AutomaticSnake
         {
             return new Random(Guid.NewGuid().GetHashCode()).Next(min, max);
         }
+
+        public static double Sigmoid(double x)
+        {
+            return (1 / (1 + Math.Exp(-1 * x)));
+        }
+
+        public static double TanH(double x)
+        {
+            return (2 / (1 + Math.Exp(-2 * x))) - 1;
+        }
     }
 }

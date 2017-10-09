@@ -4,6 +4,8 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium;
 using System.Collections.Generic;
 using System.Diagnostics;
+using OpenQA.Selenium.Remote;
+using Newtonsoft.Json;
 
 namespace AutomaticSnake
 {
@@ -11,20 +13,17 @@ namespace AutomaticSnake
     {
         static void Main(string[] args)
         {
-            ChromeDriver driver = new ChromeDriver();
+            RemoteWebDriver driver = new ChromeDriver();
             driver.Navigate().GoToUrl("http://arbaliste.github.io/Auto2048");
-            var container = driver.FindElement(By.Id("sbWelcome0"));
-            container.FindElement(By.TagName("button")).Click();
 
+            int size = 4 * 4;
             int maxTrials = 5;
             Trial[] trials = Enumerable.Range(0, maxTrials).Select(x => new Trial()
             {
-                Network = new NeuralNetwork(new int[] { 6, 8, 1 }),
+                Network = new NeuralNetwork(new int[] { size, 9, 1 }, Util.Sigmoid),
                 Fitness = 0
             }).ToArray();
             Trial bestTrial = trials[0];
-
-            Stopwatch stopwatch = new Stopwatch();
 
             int gen = 1;
 
@@ -33,88 +32,47 @@ namespace AutomaticSnake
                 Console.WriteLine("Running generation " + gen);
                 for (int trialNum = 0; trialNum < maxTrials; trialNum++)
                 {
-                    stopwatch.Reset();
-                    stopwatch.Start();
-                    int ticks = 0;
+                    double[] previous = new double[size];
                     while (true)
                     {
+                        // Exits the program when the browser is closed
+                        // e has to be here because it will be optimized out?
+                        var e = "";
                         try
                         {
-                            // Exits the program when the browser is closed
-                            // e has to be here because it will be optimized out?
-                            var e = "";
-                            try
-                            {
-                                e = driver.Title;
-                            }
-                            catch
-                            {
-                                driver.Dispose();
-                                return;
-                            }
-
-                            int xPos = int.Parse(driver.ExecuteScript("return snake.snakeHead.col").ToString());
-                            int yPos = int.Parse(driver.ExecuteScript("return snake.snakeHead.row").ToString());
-                            List<List<int>> board = ((IReadOnlyCollection<object>)driver.ExecuteScript("return mySnakeBoard.grid")).Select(x => ((IEnumerable<object>)x).Select(y => int.Parse(y.ToString())).ToList()).ToList();
-                            List<Dictionary<string, object>> snakeBody = ((IEnumerable<object>)driver.ExecuteScript("return Object.values(snake.snakeBody).map(x => { return { col: x.col, row: x.row }})")).Cast<Dictionary<string, object>>().ToList();
-                            int yFoodPos = board.FindIndex(x => x.Contains(-1));
-                            int xFoodPos = board[yFoodPos].FindIndex(x => x == -1);
-
-                            double diffX = (xFoodPos - xPos) / (double)board[0].Count;
-                            double diffY = (yFoodPos - yPos) / (double)board.Count;
-
-                            for (int i = 1; i < snakeBody.Count; i++)
-                            {
-                                board[(int)snakeBody[i]["col"]][(int)snakeBody[i]["row"]] = 1;
-                            }
-
-                            // Do not reward inactivity
-                            if (stopwatch.ElapsedMilliseconds > 1000 && int.Parse(driver.ExecuteScript("return mySnakeBoard.getBoardState()").ToString()) == 1)
-                            {
-                                trials[trialNum].Fitness = -1;
-                                break;
-                            }
-
-                            // Dead
-                            if (stopwatch.ElapsedMilliseconds > 1000 * 100 || xPos == 0 || yPos == 0 || xPos == board[0].Count || yPos == board.Count || int.Parse(driver.ExecuteScript("return mySnakeBoard.getBoardState()").ToString()) == 0)
-                            {
-                                trials[trialNum].Fitness = ticks + 1000 * int.Parse(driver.ExecuteScript("return snake.snakeLength").ToString());
-                                break;
-                            }
-
-
-                            double top = board[yPos - 1][xPos] == 1 ? 1 : -1;
-                            double bottom = board[yPos + 1][xPos] == 1 ? 1 : -1;
-                            double left = board[yPos][xPos - 1] == 1 ? 1 : -1;
-                            double right = board[yPos][xPos + 1] == 1 ? 1 : -1;
-
-                            string keys = "wasd";
-                            double data = trials[trialNum].Network.Run(new double[] { diffX, diffY, top, bottom, left, right })[0];
-                            string sendKeys = "";
-                            if (data < 0.2) sendKeys = "w";
-                            else if (data < 0.4) sendKeys = "a";
-                            else if (data < 0.6) sendKeys = "s";
-                            else if (data < 0.8) sendKeys = "d";
-                            else sendKeys = "";
-
-                            driver.Keyboard.SendKeys(sendKeys);
-                            System.Threading.Thread.Sleep(100);
-                            ticks++;
+                            e = driver.Title;
                         }
-                        catch (Exception e)
+                        catch
                         {
-                            Console.WriteLine(e);
-                            // TODO: Change
-                            trials[trialNum].Fitness = -1;
+                            driver.Dispose();
+                            return;
+                        }
+
+                        System.Threading.Thread.Sleep(200);
+                        var manager = (Dictionary<string, dynamic>)driver.ExecuteScript("return gameManager");
+                        bool over = manager["over"];
+                        long score = manager["score"];
+                        double[] board = ((IEnumerable<object>)(manager["grid"]["cells"])).Cast<IEnumerable<dynamic>>().SelectMany(x => x).Select(x => Math.Log((x?["value"]*2) ?? 2, 2) / 12d).Cast<double>().ToArray();
+
+                        if (over || board.SequenceEqual(previous))
+                        {
+                            trials[trialNum].Fitness = score;
                             break;
                         }
+
+                        double data = trials[trialNum].Network.Run(board)[0];
+                        string sendKeys = "";
+                        if (data < 0.25) sendKeys = "w";
+                        else if (data < 0.5) sendKeys = "a";
+                        else if (data < 0.75) sendKeys = "s";
+                        else sendKeys = "d";
+
+                        driver.Keyboard.SendKeys(sendKeys);
+                        //System.Threading.Thread.Sleep(100);
+                        board.CopyTo(previous, 0);
                     }
-                    try
-                    {
-                        driver.FindElementsByTagName("button").Last().Click();
-                    }
-                    catch { }
                     Console.WriteLine(" - Trial " + trialNum + ": " + trials[trialNum].Fitness);
+                    driver.FindElementByClassName("restart-button").Click();
                 }
                 bestTrial = trials.OrderBy(x => x.Fitness).Last();
                 for (int i = 0; i < trials.Length; i++)
