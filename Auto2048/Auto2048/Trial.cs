@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenQA.Selenium.Remote;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,5 +11,6 @@ namespace AutomaticSnake
     {
         public NeuralNetwork Network;
         public double Fitness;
+        public RemoteWebDriver Driver;
     }
 }
