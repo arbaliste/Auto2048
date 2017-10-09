@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutomaticSnake
+namespace NeuralNetwork
 {
-    class Trial
+    public class Trial
     {
         public NeuralNetwork Network;
         public double Fitness;

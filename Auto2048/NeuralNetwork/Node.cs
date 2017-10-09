@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutomaticSnake
+namespace NeuralNetwork
 {
-    class Node
+    public class Node
     {
         public List<Edge> Edges;
         public double Bias;

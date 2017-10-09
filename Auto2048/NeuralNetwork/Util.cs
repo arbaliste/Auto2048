@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutomaticSnake
+namespace NeuralNetwork
 {
-    static class Util
+    public static class Util
     {
         public static double RandomSeededDouble()
         {

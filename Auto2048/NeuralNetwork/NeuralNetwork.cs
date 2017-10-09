@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AutomaticSnake
+namespace NeuralNetwork
 {
-    class NeuralNetwork
+    public class NeuralNetwork
     {
         public List<Layer> Layers;
         public Func<double, double> Activation;

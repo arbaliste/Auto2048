@@ -7,8 +7,9 @@ using System.Diagnostics;
 using OpenQA.Selenium.Remote;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using NeuralNetwork;
 
-namespace AutomaticSnake
+namespace NeuralNetwork
 {
     class Program
     {
@@ -19,7 +20,7 @@ namespace AutomaticSnake
             int maxTrials = 20;
             Trial[] trials = Enumerable.Range(0, maxTrials).Select(x => new Trial()
             {
-                Network = new NeuralNetwork(new int[] { size, 9, 1 }, NeuralNetwork.ActivationFunctions.Sigmoid),
+                Network = new NeuralNetwork(new int[] { size, 9, 1 }, NeuralNetwork.ActivationFunctions.TanH),
                 Fitness = 0,
                 Driver = new ChromeDriver()
             }).ToArray();
@@ -42,7 +43,7 @@ namespace AutomaticSnake
                         var manager = (Dictionary<string, dynamic>)trial.Driver.ExecuteScript("return gameManager");
                         bool over = manager["over"];
                         long score = manager["score"];
-                        double[] board = ((IEnumerable<object>)(manager["grid"]["cells"])).Cast<IEnumerable<dynamic>>().SelectMany(x => x).Select(x => Math.Log((x?["value"]*2) ?? 2, 2) / 12d).Cast<double>().ToArray();
+                        double[] board = ((IEnumerable<object>)(manager["grid"]["cells"])).Cast<IEnumerable<dynamic>>().SelectMany(x => x).Select(x => Math.Log(x?["value"] ?? -1, 2) / 11d).Cast<double>().ToArray();
 
                         if (over || board.SequenceEqual(previous))
                         {
