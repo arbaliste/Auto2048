@@ -20,7 +20,7 @@ namespace NeuralNetwork
             int maxTrials = 20;
             Trial[] trials = Enumerable.Range(0, maxTrials).Select(x => new Trial()
             {
-                Network = new NeuralNetwork(new int[] { size, 9, 1 }, NeuralNetwork.ActivationFunctions.Sigmoid),
+                Network = new NeuralNetwork(new int[] { size, 9, 1 }, NeuralNetwork.ActivationFunctions.TanH, NeuralNetwork.MutateFunctions.GenerateReplacement(1)),
                 Fitness = 0,
                 Driver = new ChromeDriver()
             }).ToArray();
@@ -53,9 +53,9 @@ namespace NeuralNetwork
 
                         double data = trial.Network.Run(board)[0];
                         string sendKeys = "";
-                        if (data < 0.25) sendKeys = "w";
-                        else if (data < 0.5) sendKeys = "a";
-                        else if (data < 0.75) sendKeys = "s";
+                        if (data < -0.5) sendKeys = "w";
+                        else if (data < 0) sendKeys = "a";
+                        else if (data < 0.5) sendKeys = "s";
                         else sendKeys = "d";
 
                         trial.Driver.Keyboard.SendKeys(sendKeys);

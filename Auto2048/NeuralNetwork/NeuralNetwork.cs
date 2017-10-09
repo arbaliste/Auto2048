@@ -9,11 +9,13 @@ namespace NeuralNetwork
     public class NeuralNetwork
     {
         public List<Layer> Layers;
-        public Func<double, double> Activation;
+        public Func<double, double> ActivationFunction;
+        public Func<double, double> MutationFunction;
 
-        public NeuralNetwork(int[] layerNums, Func<double, double> function)
+        public NeuralNetwork(int[] layerNums, Func<double, double> activation, Func<double, double> mutation)
         {
-            Activation = function;
+            ActivationFunction = activation;
+            MutationFunction = mutation;
             Layers = new List<Layer>();
             for (int i = 0; i < layerNums.Length; i++)
             {
@@ -43,7 +45,7 @@ namespace NeuralNetwork
                     if (i == 0)
                         n.Value = input[j];
                     else
-                        n.Value = Activation(Enumerable.Range(0, Layers[i - 1].Nodes.Count).Select(x => Layers[i - 1].Nodes[x].Value * n.Edges[x].Weight).Sum() + n.Bias);
+                        n.Value = ActivationFunction(Enumerable.Range(0, Layers[i - 1].Nodes.Count).Select(x => Layers[i - 1].Nodes[x].Value * n.Edges[x].Weight).Sum() + n.Bias);
                 }
             }
 
@@ -63,6 +65,26 @@ namespace NeuralNetwork
             }
         }
 
+        public static class MutateFunctions
+        {
+            public static Func<double, double> GenerateAdditive(double rate)
+            {
+                Func<double, double> replacement = GenerateReplacement(rate);
+                return (input) =>
+                {
+                    return input + replacement(input);
+                };
+            }
+
+            public static Func<double, double> GenerateReplacement(double rate)
+            {
+                return (input) =>
+                {
+                    return (Util.RandomSeededDouble() * 2 - 1) * rate;
+                };
+            }
+        }
+
         public void Mutate(double rate)
         {
             foreach (Layer l in Layers)
@@ -70,12 +92,12 @@ namespace NeuralNetwork
                 foreach (Node n in l.Nodes)
                 {
                     if (Util.RandomSeededDouble() <= rate)
-                        n.Bias = Util.RandomSeededDouble() * 2 - 1;
+                        n.Bias = MutationFunction(n.Bias);
 
                     foreach (Edge e in n.Edges)
                     {
                         if (Util.RandomSeededDouble() <= rate)
-                            e.Weight = Util.RandomSeededDouble() * 2 - 1;
+                            e.Weight = MutationFunction(e.Weight);
                     }
                 }
             }
@@ -83,8 +105,7 @@ namespace NeuralNetwork
 
         public static NeuralNetwork Cross(NeuralNetwork a, NeuralNetwork b)
         {
-            if (a.Activation != b.Activation) throw new ArgumentException("Networks have different activation functions");
-            NeuralNetwork child = new NeuralNetwork(a.Layers.Select(x => x.Nodes.Count).ToArray(), a.Activation);
+            NeuralNetwork child = new NeuralNetwork(a.Layers.Select(x => x.Nodes.Count).ToArray(), a.ActivationFunction, a.MutationFunction);
             for (int i = 0; i < a.Layers.Count; i++)
             {
                 for (int j = 0; j < a.Layers[i].Nodes.Count; j++)
