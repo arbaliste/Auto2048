@@ -13,61 +13,67 @@ namespace NeuralNetwork
 {
     class Program
     {
+        const int BoardSize = 4 * 4;
+        const int MaxDrivers = 10;
+        const int TrialsPerDriver = 4;
+        const int MaxTrials = MaxDrivers * TrialsPerDriver;
+
         static void Main(string[] args)
         {
+            int generation = 1;
 
-            int size = 4 * 4;
-            int maxTrials = 20;
-            Trial[] trials = Enumerable.Range(0, maxTrials).Select(x => new Trial()
+            ChromeDriver[] drivers = Enumerable.Range(0, MaxDrivers).Select(x => new ChromeDriver()).ToArray();
+            Trial[] trials = Enumerable.Range(0, MaxTrials).Select(x => new Trial()
             {
-                Network = new NeuralNetwork(new int[] { size, 9, 1 }, NeuralNetwork.ActivationFunctions.TanH, NeuralNetwork.MutateFunctions.GenerateReplacement(1)),
+                Network = new NeuralNetwork(new int[] { BoardSize, 9, 1 }, NeuralNetwork.ActivationFunctions.TanH, NeuralNetwork.MutateFunctions.GenerateReplacement(1)),
                 Fitness = 0,
-                Driver = new ChromeDriver()
             }).ToArray();
 
-            foreach (Trial t in trials)
-                t.Driver.Navigate().GoToUrl("http://arbaliste.github.io/Auto2048");
+            foreach (var driver in drivers)
+                driver.Navigate().GoToUrl("http://arbaliste.github.io/Auto2048");
 
-            int gen = 1;
 
             while (true)
             {
-                Console.WriteLine("Running generation " + gen);
-                Parallel.ForEach(trials, (trial) =>
+                Console.WriteLine("Running generation " + generation);
+                Parallel.ForEach(drivers, (driver, _, driverNum) =>
                 {
-                    trial.Driver.FindElementByClassName("restart-button").Click();
-                    System.Threading.Thread.Sleep(200);
-                    double[] previous = new double[size];
-                    while (true)
+                    for (int trialNum = 0; trialNum < TrialsPerDriver; trialNum++)
                     {
-                        var manager = (Dictionary<string, dynamic>)trial.Driver.ExecuteScript("return gameManager");
-                        bool over = manager["over"];
-                        long score = manager["score"];
-                        double[] board = ((IEnumerable<object>)(manager["grid"]["cells"])).Cast<IEnumerable<dynamic>>().SelectMany(x => x).Select(x => Math.Log((x?["value"]*2) ?? 2, 2) / 12d).Cast<double>().ToArray();
-
-                        if (over || board.SequenceEqual(previous))
+                        Trial trial = trials[driverNum * TrialsPerDriver + trialNum];
+                        driver.FindElementByClassName("restart-button").Click();
+                        System.Threading.Thread.Sleep(200);
+                        double[] previous = new double[BoardSize];
+                        while (true)
                         {
-                            trial.Fitness = score;
-                            break;
+                            var manager = (Dictionary<string, dynamic>)driver.ExecuteScript("return gameManager");
+                            bool over = manager["over"];
+                            long score = manager["score"];
+                            double[] board = ((IEnumerable<object>)(manager["grid"]["cells"])).Cast<IEnumerable<dynamic>>().SelectMany(x => x).Select(x => Math.Log((x?["value"] * 2) ?? 2, 2) / 12d).Cast<double>().ToArray();
+
+                            if (over || board.SequenceEqual(previous))
+                            {
+                                trial.Fitness = score;
+                                break;
+                            }
+
+                            double data = trial.Network.Run(board)[0];
+                            string sendKeys = "";
+                            if (data < -0.5) sendKeys = "w";
+                            else if (data < 0) sendKeys = "a";
+                            else if (data < 0.5) sendKeys = "s";
+                            else sendKeys = "d";
+
+                            driver.Keyboard.SendKeys(sendKeys);
+                            board.CopyTo(previous, 0);
                         }
-
-                        double data = trial.Network.Run(board)[0];
-                        string sendKeys = "";
-                        if (data < -0.5) sendKeys = "w";
-                        else if (data < 0) sendKeys = "a";
-                        else if (data < 0.5) sendKeys = "s";
-                        else sendKeys = "d";
-
-                        trial.Driver.Keyboard.SendKeys(sendKeys);
-                        //System.Threading.Thread.Sleep(100);
-                        board.CopyTo(previous, 0);
                     }
                 });
                 for (int i = 0; i < trials.Length; i++)
                     Console.WriteLine(" - Trial " + i + ": " + trials[i].Fitness);
                 Trial.BreedMethods.Aggressive(trials, 0.3);
                 Console.WriteLine(" - Best: " + trials.OrderBy(x => x.Fitness).Last().Fitness);
-                gen++;
+                generation++;
             }
         }
     }

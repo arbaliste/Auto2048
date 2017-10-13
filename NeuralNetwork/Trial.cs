@@ -11,7 +11,6 @@ namespace NeuralNetwork
     {
         public NeuralNetwork Network;
         public double Fitness;
-        public RemoteWebDriver Driver;
 
         public static class BreedMethods
         {
