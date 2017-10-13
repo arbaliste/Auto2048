@@ -20,11 +20,12 @@ namespace NeuralNetwork
                 Trial[] worstTrials = trials.OrderBy(x => x.Fitness).Take(trials.Length / 2).ToArray();
                 for (int i = 0; i < trials.Length; i++)
                 {
-                    if (worstTrials.Contains(trials[i]))
-                        trials[i].Network = NeuralNetwork.Cross(bestTrial.Network, bestTrial.Network);
+                    Trial trial = trials[i];
+                    if (worstTrials.Contains(trial))
+                        trial.Network = NeuralNetwork.Cross(bestTrial.Network, bestTrial.Network);
                     else
-                        trials[i].Network = NeuralNetwork.Cross(bestTrial.Network, trials[i].Network);
-                    if (trials[i] != bestTrial) trials[i].Network.Mutate(rate);
+                        trial.Network = NeuralNetwork.Cross(bestTrial.Network, trial.Network);
+                    if (trial != bestTrial) trial.Network.Mutate(rate);
                 }
             }
 
@@ -33,8 +34,9 @@ namespace NeuralNetwork
                 Trial bestTrial = trials.OrderBy(x => x.Fitness).Last();
                 for (int i = 0; i < trials.Length; i++)
                 {
-                    trials[i].Network = NeuralNetwork.Cross(bestTrial.Network, trials[i].Network);
-                    if (trials[i] != bestTrial) trials[i].Network.Mutate(rate);
+                    Trial trial = trials[i];
+                    trial.Network = NeuralNetwork.Cross(bestTrial.Network, trial.Network);
+                    if (trial != bestTrial) trial.Network.Mutate(rate);
                 }
             }
         }

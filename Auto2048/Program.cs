@@ -15,7 +15,7 @@ namespace NeuralNetwork
     {
         const int BoardSize = 4 * 4;
         const int MaxDrivers = 10;
-        const int TrialsPerDriver = 4;
+        const int TrialsPerDriver = 10;
         const int MaxTrials = MaxDrivers * TrialsPerDriver;
 
         static void Main(string[] args)
@@ -25,7 +25,7 @@ namespace NeuralNetwork
             ChromeDriver[] drivers = Enumerable.Range(0, MaxDrivers).Select(x => new ChromeDriver()).ToArray();
             Trial[] trials = Enumerable.Range(0, MaxTrials).Select(x => new Trial()
             {
-                Network = new NeuralNetwork(new int[] { BoardSize, 9, 1 }, NeuralNetwork.ActivationFunctions.TanH, NeuralNetwork.MutateFunctions.GenerateReplacement(1)),
+                Network = new NeuralNetwork(new int[] { BoardSize, 20, 1 }, NeuralNetwork.ActivationFunctions.TanH, NeuralNetwork.MutateFunctions.GenerateReplacement(1)),
                 Fitness = 0,
             }).ToArray();
 

@@ -19,7 +19,7 @@ namespace NeuralNetwork
             Layers = new List<Layer>();
             for (int i = 0; i < layerNums.Length; i++)
             {
-                Layer l = new Layer(layerNums[i]);
+                Layer layer = new Layer(layerNums[i]);
                 for (int j = 0; j < layerNums[i]; j++)
                 {
                     Node n = new Node();
@@ -27,9 +27,9 @@ namespace NeuralNetwork
                         n.Bias = 0;
                     else
                         n.Edges.AddRange(Enumerable.Range(0, layerNums[i - 1]).Select(x => new Edge()));
-                    l.Nodes.Add(n);
+                    layer.Nodes.Add(n);
                 }
-                Layers.Add(l);
+                Layers.Add(layer);
             }
         }
 
@@ -45,7 +45,7 @@ namespace NeuralNetwork
                     if (i == 0)
                         n.Value = input[j];
                     else
-                        n.Value = ActivationFunction(Enumerable.Range(0, Layers[i - 1].Nodes.Count).Select(x => Layers[i - 1].Nodes[x].Value * n.Edges[x].Weight).Sum() + n.Bias);
+                        n.Value = ActivationFunction(Layers[i - 1].Nodes.Select((x, index) => x.Value * n.Edges[index].Weight).Sum() + n.Bias);
                 }
             }
 
@@ -110,12 +110,13 @@ namespace NeuralNetwork
             {
                 for (int j = 0; j < a.Layers[i].Nodes.Count; j++)
                 {
+                    Node childNode = child.Layers[i].Nodes[j];
                     Node copy = (Util.RandomSeededDouble() < 0.5 ? a : b).Layers[i].Nodes[j];
                     for (int e = 0; e < child.Layers[i].Nodes[j].Edges.Count; e++)
                     {
-                        child.Layers[i].Nodes[j].Edges[e].Weight = copy.Edges[e].Weight;
+                        childNode.Edges[e].Weight = copy.Edges[e].Weight;
                     }
-                    child.Layers[i].Nodes[j].Bias = copy.Bias;
+                    childNode.Bias = copy.Bias;
                 }
             }
             return child;
