@@ -25,7 +25,7 @@ namespace NeuralNetwork
             ChromeDriver[] drivers = Enumerable.Range(0, MaxDrivers).Select(x => new ChromeDriver()).ToArray();
             Trial[] trials = Enumerable.Range(0, MaxTrials).Select(x => new Trial()
             {
-                Network = new NeuralNetwork(new int[] { BoardSize, 20, 1 }, NeuralNetwork.ActivationFunctions.TanH, NeuralNetwork.MutateFunctions.GenerateReplacement(1)),
+                Network = new NeuralNetwork(new int[] { BoardSize, 11, 6, 1 }, NeuralNetwork.ActivationFunctions.TanH, NeuralNetwork.MutateFunctions.GenerateReplacement(1)),
                 Fitness = 0,
             }).ToArray();
 
@@ -35,14 +35,13 @@ namespace NeuralNetwork
 
             while (true)
             {
-                Console.WriteLine("Running generation " + generation);
                 Parallel.ForEach(drivers, (driver, _, driverNum) =>
                 {
                     for (int trialNum = 0; trialNum < TrialsPerDriver; trialNum++)
                     {
                         Trial trial = trials[driverNum * TrialsPerDriver + trialNum];
                         driver.FindElementByClassName("restart-button").Click();
-                        System.Threading.Thread.Sleep(200);
+                        //System.Threading.Thread.Sleep(200);
                         double[] previous = new double[BoardSize];
                         while (true)
                         {
@@ -69,10 +68,8 @@ namespace NeuralNetwork
                         }
                     }
                 });
-                for (int i = 0; i < trials.Length; i++)
-                    Console.WriteLine(" - Trial " + i + ": " + trials[i].Fitness);
                 Trial.BreedMethods.Aggressive(trials, 0.3);
-                Console.WriteLine(" - Best: " + trials.OrderBy(x => x.Fitness).Last().Fitness);
+                Console.WriteLine($"Generation {generation}: *{trials.OrderBy(x => x.Fitness).Last().Fitness}* {String.Join(", ", trials.Select(x => x.Fitness.ToString()))}");
                 generation++;
             }
         }
