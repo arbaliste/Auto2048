@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NeuralNetwork;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace AutoGames
 {
@@ -14,6 +16,8 @@ namespace AutoGames
         const int MaxDrivers = 10;
         const int TrialsPerDriver = 10;
         const int MaxTrials = MaxDrivers * TrialsPerDriver;
+        const int MaxRepeat = 50;
+        const string backupFile = "network.json";
 
         public override void Run()
         {
@@ -23,8 +27,22 @@ namespace AutoGames
             Trial[] trials = Enumerable.Range(0, MaxTrials).Select(x => new Trial()
             {
                 Network = new Network(new int[] { BoardSize + 2, 11, 6, 1 }, Network.ActivationFunctions.TanH, Network.MutateFunctions.GenerateReplacement(1)),
-                Fitness = 0,
+                Fitness = 0
             }).ToArray();
+
+            if (File.Exists(backupFile))
+            {
+                Console.WriteLine("Generating networks from backup");
+                var layers = JsonConvert.DeserializeObject<List<List<Layer>>>(File.ReadAllText(backupFile));
+                for (int i = 0; i < trials.Length; i++)
+                {
+                    trials[i].Network.Layers = layers[i];
+                }
+            }
+            else
+            {
+                Console.WriteLine("Generating networks randomly");
+            }
 
             foreach (var driver in drivers)
                 driver.Navigate().GoToUrl("http://arbaliste.github.io/AutoGames/2048");
@@ -58,7 +76,7 @@ namespace AutoGames
                             else
                                 repeatNum = 0;
 
-                            if (over || repeatNum > 10)
+                            if (over || repeatNum > MaxRepeat)
                             {
                                 trial.Fitness = score;
                                 break;
@@ -75,11 +93,13 @@ namespace AutoGames
 
                             driver.Keyboard.SendKeys(sendKeys);
                             board.CopyTo(previous, 0);
+
                         }
                     }
                 });
                 Trial.BreedMethods.Aggressive(trials, 0.3);
-                Console.WriteLine($"Generation {generation}: *{trials.OrderBy(x => x.Fitness).Last().Fitness}* {String.Join(", ", trials.Select(x => x.Fitness.ToString()))}");
+                Console.WriteLine($"Gen {generation} | Max: {trials.Max(x => x.Fitness)} | Avg: {trials.Average(x => x.Fitness)} | Top: {String.Join(", ", trials.OrderByDescending(x => x.Fitness).Take(5).Select(x => x.Fitness))}");
+                File.WriteAllText(backupFile, JsonConvert.SerializeObject(trials.Select(x => x.Network.Layers)));
                 generation++;
             }
         }
