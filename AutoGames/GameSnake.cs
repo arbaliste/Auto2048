@@ -13,13 +13,15 @@ namespace AutoGames
 {
     public class GameSnake : Game
     {
-        public GameSnake() : base("snake") { }
+        public GameSnake() : base("http://arbaliste.github.io/AutoGames/snake") { }
 
         protected override Network GenerateNetwork() => new Network(new int[] { 6, 8, 1 }, Network.ActivationFunctions.Sigmoid, Network.MutateFunctions.GenerateReplacement(1));
 
         protected override void RunTrial(RemoteWebDriver driver, Trial trial)
         {
-            // TODO: May not work, have not tested
+            ///
+            /// TODO: May not work, have not tested
+            ///
             var container = driver.FindElement(By.Id("sbWelcome0"));
             container.FindElement(By.TagName("button")).Click();
 

@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Game.cs" />
     <Compile Include="Game2048.cs" />
+    <Compile Include="GameFlappy.cs" />
     <Compile Include="GameSnake.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

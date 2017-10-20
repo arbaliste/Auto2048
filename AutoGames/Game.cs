@@ -54,7 +54,7 @@ namespace AutoGames
             }
 
             foreach (var driver in drivers)
-                driver.Navigate().GoToUrl("http://arbaliste.github.io/AutoGames/" + Url);
+                driver.Navigate().GoToUrl(Url);
 
 
             while (true)
