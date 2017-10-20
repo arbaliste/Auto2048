@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{5E56A60A-2ABE-45AA-987F-584446B75485}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Auto2048</RootNamespace>
-    <AssemblyName>Auto2048</AssemblyName>
+    <RootNamespace>AutoGames</RootNamespace>
+    <AssemblyName>AutoGames</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -51,6 +51,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Game.cs" />
+    <Compile Include="Game2048.cs" />
+    <Compile Include="GameSnake.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

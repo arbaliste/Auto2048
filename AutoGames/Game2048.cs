@@ -1,36 +1,33 @@
-﻿using System;
-using System.Linq;
-using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium.Chrome;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using OpenQA.Selenium.Remote;
-using Newtonsoft.Json;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using NeuralNetwork;
 
-namespace NeuralNetwork
+namespace AutoGames
 {
-    class Program
+    public class Game2048 : Game
     {
         const int BoardSize = 4 * 4;
         const int MaxDrivers = 10;
         const int TrialsPerDriver = 10;
         const int MaxTrials = MaxDrivers * TrialsPerDriver;
 
-        static void Main(string[] args)
+        public override void Run()
         {
             int generation = 1;
 
             ChromeDriver[] drivers = Enumerable.Range(0, MaxDrivers).Select(x => new ChromeDriver()).ToArray();
             Trial[] trials = Enumerable.Range(0, MaxTrials).Select(x => new Trial()
             {
-                Network = new NeuralNetwork(new int[] { BoardSize, 11, 6, 1 }, NeuralNetwork.ActivationFunctions.TanH, NeuralNetwork.MutateFunctions.GenerateReplacement(1)),
+                Network = new Network(new int[] { BoardSize, 11, 6, 1 }, Network.ActivationFunctions.TanH, Network.MutateFunctions.GenerateReplacement(1)),
                 Fitness = 0,
             }).ToArray();
 
             foreach (var driver in drivers)
-                driver.Navigate().GoToUrl("http://arbaliste.github.io/Auto2048");
+                driver.Navigate().GoToUrl("http://arbaliste.github.io/AutoGames/2048");
 
 
             while (true)

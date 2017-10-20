@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auto2048", "Auto2048\Auto2048.csproj", "{5E56A60A-2ABE-45AA-987F-584446B75485}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoGames", "AutoGames\AutoGames.csproj", "{5E56A60A-2ABE-45AA-987F-584446B75485}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuralNetwork", "NeuralNetwork\NeuralNetwork.csproj", "{AA5AACDC-64F8-4F37-87AB-04801580B64F}"
 EndProject

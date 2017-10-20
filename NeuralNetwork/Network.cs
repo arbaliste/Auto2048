@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace NeuralNetwork
 {
-    public class NeuralNetwork
+    public class Network
     {
         public List<Layer> Layers;
         public Func<double, double> ActivationFunction;
         public Func<double, double> MutationFunction;
 
-        public NeuralNetwork(int[] layerNums, Func<double, double> activation, Func<double, double> mutation)
+        public Network(int[] layerNums, Func<double, double> activation, Func<double, double> mutation)
         {
             ActivationFunction = activation;
             MutationFunction = mutation;
@@ -103,9 +103,9 @@ namespace NeuralNetwork
             }
         }
 
-        public static NeuralNetwork Cross(NeuralNetwork a, NeuralNetwork b)
+        public static Network Cross(Network a, Network b)
         {
-            NeuralNetwork child = new NeuralNetwork(a.Layers.Select(x => x.Nodes.Count).ToArray(), a.ActivationFunction, a.MutationFunction);
+            Network child = new Network(a.Layers.Select(x => x.Nodes.Count).ToArray(), a.ActivationFunction, a.MutationFunction);
             for (int i = 0; i < a.Layers.Count; i++)
             {
                 for (int j = 0; j < a.Layers[i].Nodes.Count; j++)

@@ -9,7 +9,7 @@ namespace NeuralNetwork
 {
     public class Trial
     {
-        public NeuralNetwork Network;
+        public Network Network;
         public double Fitness;
 
         public static class BreedMethods
@@ -22,9 +22,9 @@ namespace NeuralNetwork
                 {
                     Trial trial = trials[i];
                     if (worstTrials.Contains(trial))
-                        trial.Network = NeuralNetwork.Cross(bestTrial.Network, bestTrial.Network);
+                        trial.Network = Network.Cross(bestTrial.Network, bestTrial.Network);
                     else
-                        trial.Network = NeuralNetwork.Cross(bestTrial.Network, trial.Network);
+                        trial.Network = Network.Cross(bestTrial.Network, trial.Network);
                     if (trial != bestTrial) trial.Network.Mutate(rate);
                 }
             }
@@ -35,7 +35,7 @@ namespace NeuralNetwork
                 for (int i = 0; i < trials.Length; i++)
                 {
                     Trial trial = trials[i];
-                    trial.Network = NeuralNetwork.Cross(bestTrial.Network, trial.Network);
+                    trial.Network = Network.Cross(bestTrial.Network, trial.Network);
                     if (trial != bestTrial) trial.Network.Mutate(rate);
                 }
             }
