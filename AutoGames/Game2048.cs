@@ -22,7 +22,7 @@ namespace AutoGames
             ChromeDriver[] drivers = Enumerable.Range(0, MaxDrivers).Select(x => new ChromeDriver()).ToArray();
             Trial[] trials = Enumerable.Range(0, MaxTrials).Select(x => new Trial()
             {
-                Network = new Network(new int[] { BoardSize, 11, 6, 1 }, Network.ActivationFunctions.TanH, Network.MutateFunctions.GenerateReplacement(1)),
+                Network = new Network(new int[] { BoardSize + 2, 11, 6, 1 }, Network.ActivationFunctions.TanH, Network.MutateFunctions.GenerateReplacement(1)),
                 Fitness = 0,
             }).ToArray();
 
@@ -40,25 +40,38 @@ namespace AutoGames
                         driver.FindElementByClassName("restart-button").Click();
                         //System.Threading.Thread.Sleep(200);
                         double[] previous = new double[BoardSize];
+                        double previousMove = 0;
+                        int repeatNum = 0;
                         while (true)
                         {
                             var manager = (Dictionary<string, dynamic>)driver.ExecuteScript("return gameManager");
                             bool over = manager["over"];
                             long score = manager["score"];
                             double[] board = ((IEnumerable<object>)(manager["grid"]["cells"])).Cast<IEnumerable<dynamic>>().SelectMany(x => x).Select(x => Math.Log((x?["value"] * 2) ?? 2, 2) / 12d).Cast<double>().ToArray();
+                            List<double> inputs = new List<double>();
+                            inputs.AddRange(board);
+                            inputs.Add(board.SequenceEqual(previous) ? 1 : -1);
+                            inputs.Add(previousMove);
 
-                            if (over || board.SequenceEqual(previous))
+                            if (board.SequenceEqual(previous))
+                                repeatNum++;
+                            else
+                                repeatNum = 0;
+
+                            if (over || repeatNum > 10)
                             {
                                 trial.Fitness = score;
                                 break;
                             }
 
-                            double data = trial.Network.Run(board)[0];
+                            double data = trial.Network.Run(inputs.ToArray())[0];
                             string sendKeys = "";
                             if (data < -0.5) sendKeys = "w";
                             else if (data < 0) sendKeys = "a";
                             else if (data < 0.5) sendKeys = "s";
                             else sendKeys = "d";
+
+                            previousMove = data;
 
                             driver.Keyboard.SendKeys(sendKeys);
                             board.CopyTo(previous, 0);
