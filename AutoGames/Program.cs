@@ -15,7 +15,7 @@ namespace AutoGames
     {
         public static void Main(string[] args)
         {
-            new GameSnake().Run();
+            new Game2048().Run();
         }
     }
 }
