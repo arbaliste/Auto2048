@@ -700,6 +700,7 @@ SNAKE.Board = SNAKE.Board || (function() {
             tryAgainStart.appendChild( document.createTextNode("Play Again?"));
             
             var reloadGame = function() {
+		Math.seedrandom('0');
                 tmpElm.style.display = "none";
                 me.resetBoard();
                 me.setBoardState(1);
