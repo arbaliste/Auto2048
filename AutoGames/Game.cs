@@ -13,7 +13,7 @@ namespace AutoGames
 {
     public abstract class Game
     {
-        const int MaxDrivers = 10;
+        const int MaxDrivers = 20;
         const int TrialsPerDriver = 10;
         const int MaxTrials = MaxDrivers * TrialsPerDriver;
         const string backupFile = "network.json";

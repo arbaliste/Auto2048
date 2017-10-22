@@ -23,9 +23,11 @@ namespace AutoGames
             /// TODO: May not work, have not tested
             ///
             var container = driver.FindElement(By.Id("sbWelcome0"));
-            container.FindElement(By.TagName("button")).Click();
+            var startButton = container.FindElement(By.TagName("button"));
+            if (startButton.Displayed) startButton.Click();
 
-            driver.FindElementsByTagName("button").Last().Click();
+            var button = driver.FindElementsByTagName("button").Last();
+            if (button.Displayed) button.Click();
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -45,15 +47,16 @@ namespace AutoGames
 
                     for (int i = 1; i < snakeBody.Count; i++)
                     {
-                        board[(int)snakeBody[i]["col"]][(int)snakeBody[i]["row"]] = 1;
+                        if (int.Parse(snakeBody[i]["col"].ToString()) > 0 && int.Parse(snakeBody[i]["row"].ToString()) > 0)
+                            board[(int)snakeBody[i]["col"]][(int)snakeBody[i]["row"]] = 1;
                     }
 
                     // Do not reward inactivity
-                    if (stopwatch.ElapsedMilliseconds > 1000 && int.Parse(driver.ExecuteScript("return mySnakeBoard.getBoardState()").ToString()) == 1)
+                    /*if (stopwatch.ElapsedMilliseconds > 1000 && int.Parse(driver.ExecuteScript("return mySnakeBoard.getBoardState()").ToString()) == 1)
                     {
                         trial.Fitness = -1;
                         break;
-                    }
+                    }*/
 
                     // Dead
                     if (stopwatch.ElapsedMilliseconds > 1000 * 100 || xPos == 0 || yPos == 0 || xPos == board[0].Count || yPos == board.Count || int.Parse(driver.ExecuteScript("return mySnakeBoard.getBoardState()").ToString()) == 0)
@@ -70,11 +73,10 @@ namespace AutoGames
 
                     double data = trial.Network.Run(new double[] { diffX, diffY, top, bottom, left, right })[0];
                     string sendKeys = "";
-                    if (data < 0.2) sendKeys = "w";
-                    else if (data < 0.4) sendKeys = "a";
-                    else if (data < 0.6) sendKeys = "s";
-                    else if (data < 0.8) sendKeys = "d";
-                    else sendKeys = "";
+                    if (data < 0.25) sendKeys = "w";
+                    else if (data < 0.5) sendKeys = "a";
+                    else if (data < 0.75) sendKeys = "s";
+                    else sendKeys = "d";
 
                     driver.Keyboard.SendKeys(sendKeys);
                     System.Threading.Thread.Sleep(100);

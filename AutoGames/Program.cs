@@ -15,7 +15,7 @@ namespace AutoGames
     {
         public static void Main(string[] args)
         {
-            new GameFlappy().Run();
+            new GameSnake().Run();
         }
     }
 }

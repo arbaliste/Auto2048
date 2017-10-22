@@ -28,8 +28,8 @@ namespace AutoGames
                 var playerPos = driver.FindElementById("player").Location;
                 var playerSize = driver.FindElementById("player").Size;
 
-                double playerX = (double)(playerPos.X + playerSize.Width / 2);
-                double playerY = (double)(playerPos.Y + playerSize.Height / 2);
+                double playerX = playerPos.X + playerSize.Width / 2;
+                double playerY = playerPos.Y + playerSize.Height / 2;
 
                 double screenX = driver.FindElementById("flyarea").Size.Width;
                 double screenY = driver.FindElementById("flyarea").Size.Height;
@@ -38,6 +38,7 @@ namespace AutoGames
                 double pipeY = screenY;
                 if (driver.ExecuteScript("return window.pipes[0]") != null)
                 {
+                    // TODO: It's null?
                     pipeX = double.Parse(driver.ExecuteScript("return window.pipes[0].children('.pipe_upper').offset().left - 2").ToString());
                     pipeY = double.Parse(driver.ExecuteScript("return window.pipes[0].children('.pipe_upper').offset().top + window.pipes[0].children('.pipe_upper').height() + pipeheight / 2").ToString());
                 }
