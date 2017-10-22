@@ -49,7 +49,9 @@ if (navigator.onLine && window.location.hostname === 'patorjk.com') {
     <div id="game-area" tabindex="0">
     </div>
     <script type="text/javascript" src="./js/snake.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.3/seedrandom.min.js"></script>
     <script type="text/javascript">
+    Math.seedrandom('0');
     var mySnakeBoard = new SNAKE.Board(  {
                                             boardContainer: "game-area",
                                             fullScreen: true
