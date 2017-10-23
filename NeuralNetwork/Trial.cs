@@ -25,9 +25,11 @@ namespace NeuralNetwork
                     Trial trial = trials[i];
                     if (worstTrials.Contains(trial))
                         trial.Network = Network.Cross(bestTrial.Network, bestTrial.Network);
-                    else
+                    else if (trial != bestTrial)
+                    {
                         trial.Network = Network.Cross(bestTrial.Network, trial.Network);
-                    if (trial != bestTrial) trial.Network.Mutate(rate);
+                        trial.Network.Mutate(rate);
+                    }
                 }
             }
 

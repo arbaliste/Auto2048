@@ -1,6 +1,7 @@
 ﻿using NeuralNetwork;
 using Newtonsoft.Json;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.PhantomJS;
 using OpenQA.Selenium.Remote;
 using System;
 using System.Collections.Generic;
@@ -33,7 +34,7 @@ namespace AutoGames
         {
             int generation = 1;
 
-            ChromeDriver[] drivers = Enumerable.Range(0, MaxDrivers).Select(x => new ChromeDriver()).ToArray();
+            RemoteWebDriver[] drivers = Enumerable.Range(0, MaxDrivers).Select(x => new ChromeDriver()).ToArray();
             Trial[] trials = Enumerable.Range(0, MaxTrials).Select(x => new Trial()
             {
                 Network = GenerateNetwork(),
