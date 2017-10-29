@@ -15,7 +15,7 @@ namespace AutoGames
     {
         public GameSnake() : base("http://arbaliste.github.io/AutoGames/snake") { }
 
-        protected override Network GenerateNetwork() => new Network(new int[] { 6, 8, 1 }, Network.ActivationFunctions.Sigmoid, Network.MutateFunctions.GenerateReplacement(1));
+        protected override Network GenerateNetwork() => new Network(new int[] { 6, 8, 1 }, Range.ZeroOne, MutateFunctions.Replacement);
 
         protected override void RunTrial(RemoteWebDriver driver, Trial trial)
         {

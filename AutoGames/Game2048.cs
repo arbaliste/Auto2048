@@ -18,7 +18,7 @@ namespace AutoGames
 
         public Game2048() : base("http://arbaliste.github.io/AutoGames/2048") { }
 
-        protected override Network GenerateNetwork() => new Network(new int[] { BoardSize + 2, 12, 6, 1 }, Network.ActivationFunctions.TanH, Network.MutateFunctions.GenerateReplacement(1));
+        protected override Network GenerateNetwork() => new Network(new int[] { BoardSize + 2, 12, 6, 1 }, Range.NegativeOneOne, MutateFunctions.Replacement);
 
         protected override void RunTrial(RemoteWebDriver driver, Trial trial)
         {

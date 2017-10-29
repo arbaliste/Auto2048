@@ -12,7 +12,7 @@ namespace AutoGames
     {
         public GameFlappy() : base("http://nebezb.com/floppybird/") { }
 
-        protected override Network GenerateNetwork() => new Network(new int[] { 3, 6, 1 }, Network.ActivationFunctions.Sigmoid, Network.MutateFunctions.GenerateReplacement(1));
+        protected override Network GenerateNetwork() => new Network(new int[] { 3, 6, 1 }, Range.ZeroOne, MutateFunctions.Replacement);
 
         protected override void RunTrial(RemoteWebDriver driver, Trial trial)
         {

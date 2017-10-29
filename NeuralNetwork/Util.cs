@@ -8,14 +8,21 @@ namespace NeuralNetwork
 {
     public static class Util
     {
+        private static Random GuidRandom() => new Random(Guid.NewGuid().GetHashCode());
+
         public static double RandomSeededDouble()
         {
-            return new Random(Guid.NewGuid().GetHashCode()).NextDouble();
+            return GuidRandom().NextDouble();
         }
 
         public static int RandomSeededInt(int min, int max)
         {
-            return new Random(Guid.NewGuid().GetHashCode()).Next(min, max);
+            return GuidRandom().Next(min, max);
+        }
+
+        public static double RandomSeededDoubleRange(double min, double max)
+        {
+            return RandomSeededDouble() * (max - min) + min;
         }
     }
 }

@@ -15,7 +15,6 @@ namespace NeuralNetwork
         public Node()
         {
             Edges = new List<Edge>();
-            Bias = Util.RandomSeededDouble();
         }
     }
 }

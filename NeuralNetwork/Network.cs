@@ -9,12 +9,12 @@ namespace NeuralNetwork
     public class Network
     {
         public List<Layer> Layers;
-        public Func<double, double> ActivationFunction;
-        public Func<double, double> MutationFunction;
+        public Range Range;
+        public Func<double, double, double, double> MutationFunction;
 
-        public Network(int[] layerNums, Func<double, double> activation, Func<double, double> mutation)
+        public Network(int[] layerNums, Range range, Func<double, double, double, double> mutation)
         {
-            ActivationFunction = activation;
+            Range = range;
             MutationFunction = mutation;
             Layers = new List<Layer>();
             for (int i = 0; i < layerNums.Length; i++)
@@ -22,11 +22,9 @@ namespace NeuralNetwork
                 Layer layer = new Layer(layerNums[i]);
                 for (int j = 0; j < layerNums[i]; j++)
                 {
-                    Node n = new Node();
-                    if (i == 0)
-                        n.Bias = 0;
-                    else
-                        n.Edges.AddRange(Enumerable.Range(0, layerNums[i - 1]).Select(x => new Edge()));
+                    Node n = new Node() { Bias = Util.RandomSeededDoubleRange(Range.Min, Range.Max) };
+                    if (i != 0)
+                        n.Edges.AddRange(Enumerable.Range(0, layerNums[i - 1]).Select(x => new Edge() { Weight = Util.RandomSeededDoubleRange(Range.Min, Range.Max) }));
                     layer.Nodes.Add(n);
                 }
                 Layers.Add(layer);
@@ -45,44 +43,11 @@ namespace NeuralNetwork
                     if (i == 0)
                         n.Value = input[j];
                     else
-                        n.Value = ActivationFunction(Layers[i - 1].Nodes.Select((x, index) => x.Value * n.Edges[index].Weight).Sum() + n.Bias);
+                        n.Value = Range.ActivationFunction(Layers[i - 1].Nodes.Select((x, index) => x.Value * n.Edges[index].Weight).Sum() + n.Bias);
                 }
             }
 
             return Layers.Last().Nodes.Select(x => x.Value).ToArray();
-        }
-
-        public static class ActivationFunctions
-        {
-            public static double Sigmoid(double x)
-            {
-                return (1 / (1 + Math.Exp(-1 * x)));
-            }
-
-            public static double TanH(double x)
-            {
-                return (2 / (1 + Math.Exp(-2 * x))) - 1;
-            }
-        }
-
-        public static class MutateFunctions
-        {
-            public static Func<double, double> GenerateAdditive(double rate)
-            {
-                Func<double, double> replacement = GenerateReplacement(rate);
-                return (input) =>
-                {
-                    return input + replacement(input);
-                };
-            }
-
-            public static Func<double, double> GenerateReplacement(double rate)
-            {
-                return (input) =>
-                {
-                    return (Util.RandomSeededDouble() * 2 - 1) * rate;
-                };
-            }
         }
 
         public void Mutate(double rate)
@@ -92,12 +57,12 @@ namespace NeuralNetwork
                 foreach (Node n in l.Nodes)
                 {
                     if (Util.RandomSeededDouble() <= rate)
-                        n.Bias = MutationFunction(n.Bias);
+                        n.Bias = MutationFunction(n.Bias, Range.Min, Range.Max);
 
                     foreach (Edge e in n.Edges)
                     {
                         if (Util.RandomSeededDouble() <= rate)
-                            e.Weight = MutationFunction(e.Weight);
+                            e.Weight = MutationFunction(e.Weight, Range.Min, Range.Max);
                     }
                 }
             }
@@ -105,7 +70,7 @@ namespace NeuralNetwork
 
         public static Network Cross(Network a, Network b)
         {
-            Network child = new Network(a.Layers.Select(x => x.Nodes.Count).ToArray(), a.ActivationFunction, a.MutationFunction);
+            Network child = new Network(a.Layers.Select(x => x.Nodes.Count).ToArray(), a.Range, a.MutationFunction);
             for (int i = 0; i < a.Layers.Count; i++)
             {
                 for (int j = 0; j < a.Layers[i].Nodes.Count; j++)

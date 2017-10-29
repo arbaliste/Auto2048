@@ -9,10 +9,5 @@ namespace NeuralNetwork
     public class Edge
     {
         public double Weight;
-
-        public Edge()
-        {
-            Weight = Util.RandomSeededDouble();
-        }
     }
 }
